@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nobel Laureates Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <h1>🏆 Nobel Laureates Dashboard</h1>
+            <p>Explore Nobel Prize winners, multiple laureates, full-text motivations, and global statistics</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="laureates">Laureates Directory</button>
+            <button class="tab-btn" data-tab="search">Motivation Search</button>
+            <button class="tab-btn" data-tab="multiple">Multiple Prize Winners</button>
+            <button class="tab-btn" data-tab="stats">Country Statistics</button>
+        </nav>
+
+        <!-- Tab 1: Laureates Directory -->
+        <section id="laureates" class="tab-content active">
+            <div class="filters-card">
+                <div class="filter-group">
+                    <label for="filter-category">Category</label>
+                    <select id="filter-category">
+                        <option value="">All Categories</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Physiology or Medicine">Physiology or Medicine</option>
+                        <option value="Literature">Literature</option>
+                        <option value="Peace">Peace</option>
+                        <option value="Economic Sciences">Economic Sciences</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-year-start">Start Year</label>
+                    <input type="number" id="filter-year-start" placeholder="e.g. 1901" min="1901" max="2026">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-year-end">End Year</label>
+                    <input type="number" id="filter-year-end" placeholder="e.g. 2025" min="1901" max="2026">
+                </div>
+                <div class="filter-actions">
+                    <button id="apply-filters-btn" class="primary-btn">Apply Filters</button>
+                    <button id="reset-filters-btn" class="secondary-btn">Reset</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="laureates-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Gender / Type</th>
+                            <th>Birth Country</th>
+                            <th>Year(s)</th>
+                            <th>Category & Motivation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laureates-table-body">
+                        <tr><td colspan="5" class="loading">Loading laureates...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <button id="prev-page-btn" disabled>&laquo; Previous</button>
+                <span id="page-info">Page 1</span>
+                <button id="next-page-btn">Next &raquo;</button>
+            </div>
+        </section>
+
+        <!-- Tab 2: Motivation Search -->
+        <section id="search" class="tab-content">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search award motivations (e.g. quantum, DNA, peace, relativity)...">
+                <button id="search-btn" class="primary-btn">Search</button>
+            </div>
+            <div id="search-results-summary" class="results-summary"></div>
+            <div class="table-container">
+                <table id="search-table">
+                    <thead>
+                        <tr>
+                            <th>Laureate</th>
+                            <th>Year</th>
+                            <th>Category</th>
+                            <th>Motivation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-table-body">
+                        <tr><td colspan="4" class="placeholder">Enter a search query above to find award motivations.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab 3: Multiple Prize Winners -->
+        <section id="multiple" class="tab-content">
+            <div class="info-card">
+                <h3>Multiple Nobel Prize Laureates</h3>
+                <p>Individuals and organizations who have been awarded the Nobel Prize more than once.</p>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Laureate</th>
+                            <th>Birth Country</th>
+                            <th>Prize Count</th>
+                            <th>Prizes Awarded</th>
+                        </tr>
+                    </thead>
+                    <tbody id="multiple-table-body">
+                        <tr><td colspan="4" class="loading">Loading multiple prize winners...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab 4: Country Statistics -->
+        <section id="stats" class="tab-content">
+            <div class="info-card">
+                <h3>Nobel Laureates by Birth Country</h3>
+                <p>Total laureates grouped by their country of birth.</p>
+            </div>
+            <div class="stats-grid" id="stats-grid">
+                <div class="loading">Loading statistics...</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Yiorgos Adamopoulos &bull; OpenShift & Kubernetes Nobel Laureates App</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
