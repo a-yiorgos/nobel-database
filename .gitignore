@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# SQLite Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test / Coverage outputs
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / Frontend build artifacts (if any)
+node_modules/
+npm-debug.log*

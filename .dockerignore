@@ -1,0 +1,17 @@
+.git
+.gitignore
+README.md
+LICENSE
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv
+*.db
+*.sqlite
+*.sqlite3
+.pytest_cache
+.vscode
+.idea
+.DS_Store

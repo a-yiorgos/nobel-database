@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nobel-frontend
+  labels:
+    app.kubernetes.io/name: nobel-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: nobel-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nobel-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nobel-frontend
+        app.kubernetes.io/component: frontend
+        app.kubernetes.io/part-of: nobel-app
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 0
+      containers:
+        - name: frontend
+          image: nobel-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: API_SERVICE_URL
+              value: "http://nobel-api-service:8000"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+          livenessProbe:
+            httpGet:
+              path: /index.html
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nobel-frontend-service
+  labels:
+    app.kubernetes.io/name: nobel-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: nobel-app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: nobel-frontend
