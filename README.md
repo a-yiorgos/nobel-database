@@ -52,6 +52,7 @@ Designed specifically for Kubernetes and Red Hat OpenShift clusters, fulfilling 
 │   ├── app.js                  # Frontend JS interactivity
 │   ├── styles.css              # Custom CSS styling
 │   ├── nginx.conf              # Unprivileged Nginx configuration
+│   ├── default.conf.template   # Nginx template using API_SERVICE_URL
 │   └── Dockerfile              # Rootless Dockerfile for frontend
 ├── tests/                      # Suite of unit & integration tests
 │   └── test_backend.py         # Automated test cases

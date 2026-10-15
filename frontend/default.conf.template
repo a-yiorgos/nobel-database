@@ -1,0 +1,31 @@
+server {
+    listen 8080;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    absolute_redirect off;
+    port_in_redirect off;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy API requests to backend service
+    location /api {
+        proxy_pass ${API_SERVICE_URL};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /healthz {
+        proxy_pass ${API_SERVICE_URL}/healthz;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
