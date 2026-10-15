@@ -9,8 +9,24 @@
 <body>
     <header class="app-header">
         <div class="header-container">
-            <h1>🏆 Nobel Laureates Dashboard</h1>
-            <p>Explore Nobel Prize winners, multiple laureates, full-text motivations, and global statistics</p>
+            <h1>
+                <svg class="nobel-medal-icon" viewBox="0 0 100 100" aria-label="Nobel Prize Medal" role="img">
+                    <circle cx="50" cy="50" r="46" fill="url(#gold-gradient)" stroke="#b45309" stroke-width="4"/>
+                    <circle cx="50" cy="50" r="39" fill="none" stroke="#fef08a" stroke-width="1.5" stroke-dasharray="3 2"/>
+                    <!-- Profile profile silhouette representation -->
+                    <path d="M 46 25 C 54 25 60 30 60 38 C 60 44 56 48 53 50 C 58 54 62 60 63 68 L 37 68 C 38 60 42 54 47 50 C 44 48 40 44 40 38 C 40 30 46 25 46 25 Z" fill="#92400e" opacity="0.85"/>
+                    <text x="50" y="80" font-size="10" font-weight="bold" fill="#78350f" text-anchor="middle" font-family="serif">ALFR. NOBEL</text>
+                    <defs>
+                        <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a"/>
+                            <stop offset="50%" stop-color="#f59e0b"/>
+                            <stop offset="100%" stop-color="#b45309"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                Nobel Laureates Dashboard
+            </h1>
+            <p>Explore Nobel Prize winners, multiple laureates, full-text motivations, country statistics, and global country search</p>
         </div>
     </header>
 
@@ -18,6 +34,7 @@
         <nav class="nav-tabs">
             <button class="tab-btn active" data-tab="laureates">Laureates Directory</button>
             <button class="tab-btn" data-tab="search">Motivation Search</button>
+            <button class="tab-btn" data-tab="country-search">Country Search</button>
             <button class="tab-btn" data-tab="multiple">Multiple Prize Winners</button>
             <button class="tab-btn" data-tab="stats">Country Statistics</button>
         </nav>
@@ -99,7 +116,34 @@
             </div>
         </section>
 
-        <!-- Tab 3: Multiple Prize Winners -->
+        <!-- Tab 3: Country Search -->
+        <section id="country-search" class="tab-content">
+            <div class="info-card">
+                <h3>Country Search</h3>
+                <p>Search laureates by any country name (matches birth country then/now, death country then/now, or prize award/affiliation country then/now).</p>
+            </div>
+            <div class="search-box">
+                <input type="text" id="country-search-input" placeholder="Enter country name (e.g. Poland, Prussia, Germany, Japan, USA)...">
+                <button id="country-search-btn" class="primary-btn">Search Country</button>
+            </div>
+            <div id="country-search-summary" class="results-summary"></div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Laureate</th>
+                            <th>Prizes Awarded</th>
+                            <th>Matched Country Reason(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="country-search-table-body">
+                        <tr><td colspan="3" class="placeholder">Enter a country name above to search laureates across all country fields.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab 4: Multiple Prize Winners -->
         <section id="multiple" class="tab-content">
             <div class="info-card">
                 <h3>Multiple Nobel Prize Laureates</h3>
@@ -122,11 +166,11 @@
             </div>
         </section>
 
-        <!-- Tab 4: Country Statistics -->
+        <!-- Tab 5: Country Statistics -->
         <section id="stats" class="tab-content">
             <div class="info-card">
-                <h3>Nobel Laureates by Birth Country</h3>
-                <p>Total laureates grouped by their country of birth.</p>
+                <h3>Nobel Laureates by Country at Award Time</h3>
+                <p id="stats-subtitle">Total laureates grouped by their country / affiliation at the time the prize was awarded.</p>
             </div>
             <div class="stats-grid" id="stats-grid">
                 <div class="loading">Loading statistics...</div>

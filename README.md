@@ -57,7 +57,8 @@ Designed specifically for Kubernetes and Red Hat OpenShift clusters, fulfilling 
 │   └── test_backend.py         # Automated test cases
 └── k8s/                        # OpenShift & Kubernetes Manifests
     ├── api-deployment.yaml     # InitContainer, Backend Deployment & ClusterIP Service
-    └── frontend-deployment.yaml# Frontend Deployment & ClusterIP Service
+    ├── frontend-deployment.yaml# Frontend Deployment & ClusterIP Service
+    └── ingress.yaml            # Ingress rules for nobel.localhost and nobel-api.localhost
 ```
 
 ---
@@ -115,7 +116,14 @@ kubectl apply -f k8s/api-deployment.yaml
 
 # Deploy Frontend Service (Frontend Deployment + ClusterIP Service)
 kubectl apply -f k8s/frontend-deployment.yaml
+
+# Deploy Ingress Routes
+kubectl apply -f k8s/ingress.yaml
 ```
+
+### Ingress Host Routes
+- **Frontend UI**: `http://nobel.localhost` -> routes to `nobel-frontend-service:8080`
+- **Backend API**: `http://nobel-api.localhost` -> routes to `nobel-api-service:8000`
 
 ### Security & Rootless Compatibility
 - **Pod Security**: `runAsNonRoot: true` and `fsGroup: 0` specified at Pod level.

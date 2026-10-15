@@ -1,4 +1,4 @@
-const API_BASE_URL = window.API_BASE_URL || `http://${window.location.hostname}:8000`;
+const API_BASE_URL = window.API_BASE_URL || "";
 
 let currentPage = 1;
 const pageLimit = 20;
@@ -63,6 +63,11 @@ function setupEventListeners() {
     document.getElementById("search-input").addEventListener("keypress", (e) => {
         if (e.key === "Enter") performSearch();
     });
+
+    document.getElementById("country-search-btn").addEventListener("click", performCountrySearch);
+    document.getElementById("country-search-input").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") performCountrySearch();
+    });
 }
 
 async function loadLaureates() {
@@ -101,6 +106,10 @@ function renderLaureatesTable(laureates, tbody) {
     let html = "";
     laureates.forEach(l => {
         const name = l.full_name || l.known_name;
+        const nameHtml = l.wikipedia_url
+            ? `<a href="${escapeHtml(l.wikipedia_url)}" target="_blank" rel="noopener noreferrer" class="laureate-link">${escapeHtml(name)} 🔗</a>`
+            : `<strong>${escapeHtml(name)}</strong>`;
+
         const type = l.is_organization ? "Organization" : (l.gender ? capitalize(l.gender) : "Individual");
         const country = l.birth_country || "N/A";
 
@@ -115,7 +124,7 @@ function renderLaureatesTable(laureates, tbody) {
 
         html += `
             <tr>
-                <td><strong>${escapeHtml(name)}</strong></td>
+                <td>${nameHtml}</td>
                 <td>${escapeHtml(type)}</td>
                 <td>${escapeHtml(country)}</td>
                 <td>${escapeHtml(years)}</td>
@@ -162,9 +171,13 @@ async function performSearch() {
         let html = "";
         data.results.forEach(r => {
             const badgeClass = getCategoryBadgeClass(r.category);
+            const nameHtml = r.wikipedia_url
+                ? `<a href="${escapeHtml(r.wikipedia_url)}" target="_blank" rel="noopener noreferrer" class="laureate-link">${escapeHtml(r.known_name)} 🔗</a>`
+                : `<strong>${escapeHtml(r.known_name)}</strong>`;
+
             html += `
                 <tr>
-                    <td><strong>${escapeHtml(r.known_name)}</strong></td>
+                    <td>${nameHtml}</td>
                     <td>${escapeHtml(String(r.award_year))}</td>
                     <td><span class="badge ${badgeClass}">${escapeHtml(r.category)}</span></td>
                     <td>${escapeHtml(r.motivation)}</td>
@@ -175,6 +188,63 @@ async function performSearch() {
     } catch (err) {
         summary.textContent = "";
         tbody.innerHTML = `<tr><td colspan="4" class="loading">Error searching: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+async function performCountrySearch() {
+    const q = document.getElementById("country-search-input").value.trim();
+    const summary = document.getElementById("country-search-summary");
+    const tbody = document.getElementById("country-search-table-body");
+
+    if (!q) {
+        summary.textContent = "";
+        tbody.innerHTML = '<tr><td colspan="3" class="placeholder">Please enter a country name.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = '<tr><td colspan="3" class="loading">Searching country records...</td></tr>';
+
+    try {
+        const resp = await fetch(`${API_BASE_URL}/api/search/country?q=${encodeURIComponent(q)}`);
+        if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+        const data = await resp.json();
+
+        summary.textContent = `Found ${data.count} laureate(s) matching country query "${q}"`;
+
+        if (!data.results || data.results.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="loading">No laureates matched your country search.</td></tr>';
+            return;
+        }
+
+        let html = "";
+        data.results.forEach(r => {
+            const name = r.full_name || r.known_name;
+            const nameHtml = r.wikipedia_url
+                ? `<a href="${escapeHtml(r.wikipedia_url)}" target="_blank" rel="noopener noreferrer" class="laureate-link">${escapeHtml(name)} 🔗</a>`
+                : `<strong>${escapeHtml(name)}</strong>`;
+
+            const prizesHtml = r.prizes.map(p => {
+                const badgeClass = getCategoryBadgeClass(p.category);
+                return `<div>
+                    <span class="badge ${badgeClass}">${escapeHtml(p.category)} (${p.award_year})</span>
+                    <small>${escapeHtml(p.motivation || "")}</small>
+                </div>`;
+            }).join("");
+
+            const reasonsHtml = r.matched_reasons.map(reason => `<span class="match-reason-tag">${escapeHtml(reason)}</span>`).join("<br>");
+
+            html += `
+                <tr>
+                    <td>${nameHtml}</td>
+                    <td>${prizesHtml}</td>
+                    <td>${reasonsHtml}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    } catch (err) {
+        summary.textContent = "";
+        tbody.innerHTML = `<tr><td colspan="3" class="loading">Error searching country: ${escapeHtml(err.message)}</td></tr>`;
     }
 }
 
@@ -195,6 +265,10 @@ async function loadMultipleLaureates() {
         let html = "";
         data.laureates.forEach(l => {
             const country = l.birth_country || "N/A";
+            const nameHtml = l.wikipedia_url
+                ? `<a href="${escapeHtml(l.wikipedia_url)}" target="_blank" rel="noopener noreferrer" class="laureate-link">${escapeHtml(l.known_name)} 🔗</a>`
+                : `<strong>${escapeHtml(l.known_name)}</strong>`;
+
             const prizesHtml = l.prizes.map(p => {
                 const badgeClass = getCategoryBadgeClass(p.category);
                 return `<div style="margin-bottom: 0.3rem;">
@@ -205,7 +279,7 @@ async function loadMultipleLaureates() {
 
             html += `
                 <tr>
-                    <td><strong>${escapeHtml(l.known_name)}</strong></td>
+                    <td>${nameHtml}</td>
                     <td>${escapeHtml(country)}</td>
                     <td><strong>${l.prize_count}</strong></td>
                     <td>${prizesHtml}</td>
@@ -220,12 +294,17 @@ async function loadMultipleLaureates() {
 
 async function loadStats() {
     const grid = document.getElementById("stats-grid");
+    const subtitle = document.getElementById("stats-subtitle");
     grid.innerHTML = '<div class="loading">Loading statistics...</div>';
 
     try {
         const resp = await fetch(`${API_BASE_URL}/api/stats/countries`);
         if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
         const data = await resp.json();
+
+        if (data.stat_type) {
+            subtitle.textContent = `Total laureates grouped by country at the time the prize was awarded (${data.stat_type}).`;
+        }
 
         if (!data.countries || data.countries.length === 0) {
             grid.innerHTML = '<div class="loading">No country statistics available.</div>';
@@ -236,7 +315,7 @@ async function loadStats() {
         data.countries.forEach(c => {
             html += `
                 <div class="stat-card">
-                    <div class="country-name">${escapeHtml(c.birth_country)}</div>
+                    <div class="country-name">${escapeHtml(c.country)}</div>
                     <div class="count">${c.laureate_count}</div>
                     <small>Laureate(s)</small>
                 </div>

@@ -35,6 +35,17 @@ body {
     font-size: 2.2rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.nobel-medal-icon {
+    width: 48px;
+    height: 48px;
+    vertical-align: middle;
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));
 }
 
 .header-container p {
@@ -216,6 +227,30 @@ tr:last-child td {
 
 tr:hover {
     background-color: #f8fafc;
+}
+
+.laureate-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.laureate-link:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
+.match-reason-tag {
+    display: inline-block;
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
 }
 
 .badge {

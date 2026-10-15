@@ -16,12 +16,20 @@ def setup_test_db():
             "knownName": {"en": "Marie Curie"},
             "fullName": {"en": "Marie Curie, née Sklodowska"},
             "gender": "female",
+            "wikipedia": {"english": "https://en.wikipedia.org/wiki/Marie_Curie"},
             "birth": {
                 "date": "1867-11-07",
                 "year": "1867",
                 "place": {
+                    "country": {"en": "Russian Empire"},
                     "countryNow": {"en": "Poland"},
                     "cityNow": {"en": "Warsaw"}
+                }
+            },
+            "death": {
+                "place": {
+                    "country": {"en": "France"},
+                    "countryNow": {"en": "France"}
                 }
             },
             "nobelPrizes": [
@@ -30,14 +38,30 @@ def setup_test_db():
                     "category": {"en": "Physics"},
                     "categoryFullName": {"en": "The Nobel Prize in Physics"},
                     "portion": "1/4",
-                    "motivation": {"en": "in recognition of the extraordinary services they have rendered by their joint researches on the radiation phenomena discovered by Professor Henri Becquerel"}
+                    "motivation": {"en": "in recognition of the extraordinary services they have rendered by their joint researches on the radiation phenomena discovered by Professor Henri Becquerel"},
+                    "affiliations": [
+                        {
+                            "name": {"en": "Sorbonne University"},
+                            "city": {"en": "Paris"},
+                            "country": {"en": "France"},
+                            "countryNow": {"en": "France"}
+                        }
+                    ]
                 },
                 {
                     "awardYear": "1911",
                     "category": {"en": "Chemistry"},
                     "categoryFullName": {"en": "The Nobel Prize in Chemistry"},
                     "portion": "1",
-                    "motivation": {"en": "in recognition of her services to the advancement of chemistry by the discovery of the elements radium and polonium"}
+                    "motivation": {"en": "in recognition of her services to the advancement of chemistry by the discovery of the elements radium and polonium"},
+                    "affiliations": [
+                        {
+                            "name": {"en": "Sorbonne University"},
+                            "city": {"en": "Paris"},
+                            "country": {"en": "France"},
+                            "countryNow": {"en": "France"}
+                        }
+                    ]
                 }
             ]
         },
@@ -46,10 +70,12 @@ def setup_test_db():
             "knownName": {"en": "Albert Einstein"},
             "fullName": {"en": "Albert Einstein"},
             "gender": "male",
+            "wikipedia": {"english": "https://en.wikipedia.org/wiki/Albert_Einstein"},
             "birth": {
                 "date": "1879-03-14",
                 "year": "1879",
                 "place": {
+                    "country": {"en": "German Empire"},
                     "countryNow": {"en": "Germany"},
                     "cityNow": {"en": "Ulm"}
                 }
@@ -60,7 +86,15 @@ def setup_test_db():
                     "category": {"en": "Physics"},
                     "categoryFullName": {"en": "The Nobel Prize in Physics"},
                     "portion": "1",
-                    "motivation": {"en": "for his services to Theoretical Physics, and especially for his discovery of the law of the photoelectric effect"}
+                    "motivation": {"en": "for his services to Theoretical Physics, and especially for his discovery of the law of the photoelectric effect"},
+                    "affiliations": [
+                        {
+                            "name": {"en": "Kaiser Wilhelm Institut für Physik"},
+                            "city": {"en": "Berlin"},
+                            "country": {"en": "Germany"},
+                            "countryNow": {"en": "Germany"}
+                        }
+                    ]
                 }
             ]
         }
@@ -94,6 +128,8 @@ def test_get_laureates():
     data = response.json()
     assert data["total"] == 2
     assert len(data["laureates"]) == 2
+    curie = next(l for l in data["laureates"] if l["known_name"] == "Marie Curie")
+    assert curie["wikipedia_url"] == "https://en.wikipedia.org/wiki/Marie_Curie"
 
 def test_get_laureates_filter_category():
     response = client.get("/api/laureates?category=Chemistry")
@@ -121,8 +157,8 @@ def test_get_country_stats():
     assert response.status_code == 200
     data = response.json()
     assert data["total_countries"] == 2
-    countries = {c["birth_country"]: c["laureate_count"] for c in data["countries"]}
-    assert countries["Poland"] == 1
+    countries = {c["country"]: c["laureate_count"] for c in data["countries"]}
+    assert countries["France"] == 1
     assert countries["Germany"] == 1
 
 def test_search():
@@ -131,3 +167,11 @@ def test_search():
     data = response.json()
     assert data["count"] == 1
     assert data["results"][0]["known_name"] == "Albert Einstein"
+
+def test_search_country():
+    response = client.get("/api/search/country?q=Poland")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["results"][0]["known_name"] == "Marie Curie"
+    assert any("Poland" in reason for reason in data["results"][0]["matched_reasons"])

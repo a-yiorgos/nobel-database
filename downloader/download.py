@@ -65,7 +65,11 @@ def init_db(db_path):
             birth_date TEXT,
             birth_year INTEGER,
             birth_country TEXT,
+            birth_country_now TEXT,
             birth_city TEXT,
+            death_country TEXT,
+            death_country_now TEXT,
+            wikipedia_url TEXT,
             is_organization INTEGER
         );
 
@@ -89,6 +93,8 @@ def init_db(db_path):
             motivation TEXT,
             prize_status TEXT,
             affiliations TEXT,
+            award_country TEXT,
+            award_country_now TEXT,
             FOREIGN KEY (laureate_id) REFERENCES laureates(id)
         );
 
@@ -103,6 +109,7 @@ def init_db(db_path):
         CREATE INDEX IF NOT EXISTS idx_laureates_country ON laureates(birth_country);
         CREATE INDEX IF NOT EXISTS idx_prizes_category_year ON laureate_prizes(category, award_year);
         CREATE INDEX IF NOT EXISTS idx_prizes_laureate ON laureate_prizes(laureate_id);
+        CREATE INDEX IF NOT EXISTS idx_prizes_award_country ON laureate_prizes(award_country);
     """)
     conn.commit()
     return conn
@@ -126,22 +133,32 @@ def populate_db(conn, laureates_data, prizes_data):
         gender = l.get("gender")
         is_org = 1 if "orgName" in l or gender is None else 0
 
+        # Wikipedia link
+        wiki_data = l.get("wikipedia") or {}
+        wikipedia_url = wiki_data.get("english")
+
         birth = l.get("birth") or {}
         birth_date = birth.get("date")
         birth_year_str = birth.get("year")
         birth_year = int(birth_year_str) if birth_year_str and birth_year_str.isdigit() else None
 
-        place = birth.get("place") or {}
-        birth_country = (place.get("countryNow") or place.get("country") or {}).get("en")
-        birth_city = (place.get("cityNow") or place.get("city") or {}).get("en")
+        birth_place = birth.get("place") or {}
+        birth_country = (birth_place.get("country") or {}).get("en")
+        birth_country_now = (birth_place.get("countryNow") or birth_place.get("country") or {}).get("en")
+        birth_city = (birth_place.get("cityNow") or birth_place.get("city") or {}).get("en")
+
+        death = l.get("death") or {}
+        death_place = death.get("place") or {}
+        death_country = (death_place.get("country") or {}).get("en")
+        death_country_now = (death_place.get("countryNow") or death_place.get("country") or {}).get("en")
 
         cursor.execute(
             """
             INSERT OR REPLACE INTO laureates
-            (id, known_name, full_name, gender, birth_date, birth_year, birth_country, birth_city, is_organization)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, known_name, full_name, gender, birth_date, birth_year, birth_country, birth_country_now, birth_city, death_country, death_country_now, wikipedia_url, is_organization)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (l_id, known_name, full_name, gender, birth_date, birth_year, birth_country, birth_city, is_org)
+            (l_id, known_name, full_name, gender, birth_date, birth_year, birth_country, birth_country_now, birth_city, death_country, death_country_now, wikipedia_url, is_org)
         )
 
         # Process prizes array inside laureate
@@ -156,22 +173,44 @@ def populate_db(conn, laureates_data, prizes_data):
             prize_status = p.get("prizeStatus")
 
             affiliations_list = []
+            award_countries = []
+            award_countries_now = []
+
             for aff in p.get("affiliations", []):
                 aff_name = (aff.get("name") or {}).get("en")
                 aff_city = (aff.get("city") or {}).get("en")
                 aff_country = (aff.get("country") or {}).get("en")
+                aff_country_now = (aff.get("countryNow") or aff.get("country") or {}).get("en")
+
+                if aff_country:
+                    award_countries.append(aff_country)
+                if aff_country_now:
+                    award_countries_now.append(aff_country_now)
+
                 parts = [x for x in [aff_name, aff_city, aff_country] if x]
                 if parts:
                     affiliations_list.append(", ".join(parts))
+
+            # Residence place fallback if affiliations list has no country
+            res_place = p.get("residencePlace") or {}
+            res_country = (res_place.get("country") or {}).get("en")
+            res_country_now = (res_place.get("countryNow") or res_place.get("country") or {}).get("en")
+            if res_country:
+                award_countries.append(res_country)
+            if res_country_now:
+                award_countries_now.append(res_country_now)
+
             affiliations_str = " | ".join(affiliations_list) if affiliations_list else None
+            primary_award_country = award_countries[0] if award_countries else None
+            primary_award_country_now = award_countries_now[0] if award_countries_now else None
 
             cursor.execute(
                 """
                 INSERT INTO laureate_prizes
-                (laureate_id, award_year, category, category_full, portion, sort_order, motivation, prize_status, affiliations)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (laureate_id, award_year, category, category_full, portion, sort_order, motivation, prize_status, affiliations, award_country, award_country_now)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (l_id, award_year, category, category_full, portion, sort_order, motivation, prize_status, affiliations_str)
+                (l_id, award_year, category, category_full, portion, sort_order, motivation, prize_status, affiliations_str, primary_award_country, primary_award_country_now)
             )
 
             if motivation:
