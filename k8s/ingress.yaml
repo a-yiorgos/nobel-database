@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nobel-ingress
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: nobel.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nobel-frontend-service
+            port:
+              number: 8080
+  - host: nobel-api.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nobel-api-service
+            port:
+              number: 8000

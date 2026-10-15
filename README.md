@@ -59,7 +59,8 @@ Designed specifically for Kubernetes and Red Hat OpenShift clusters, fulfilling 
 │   └── test_backend.py         # Automated test cases
 └── k8s/                        # OpenShift & Kubernetes Manifests
     ├── api-deployment.yaml     # InitContainer, Backend Deployment & ClusterIP Service
-    └── frontend-deployment.yaml# Frontend Deployment & ClusterIP Service
+    ├── frontend-deployment.yaml# Frontend Deployment & ClusterIP Service
+    └── ingress.yaml            # Traefik Ingress routing for frontend and backend
 ```
 
 ---
@@ -117,6 +118,9 @@ kubectl apply -f k8s/api-deployment.yaml
 
 # Deploy Frontend Service (Frontend Deployment + ClusterIP Service)
 kubectl apply -f k8s/frontend-deployment.yaml
+
+# Expose Services via Ingress (Traefik / Rancher Desktop)
+kubectl apply -f k8s/ingress.yaml
 ```
 
 ### Security & Rootless Compatibility
