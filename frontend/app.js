@@ -1,4 +1,8 @@
-const API_BASE_URL = window.API_BASE_URL || "";
+let rawApiUrl = (window.API_SERVICE_URL || window.API_BASE_URL || "").trim().replace(/\/+$/, "");
+if (rawApiUrl.endsWith("/api")) {
+    rawApiUrl = rawApiUrl.slice(0, -4);
+}
+const API_BASE_URL = rawApiUrl;
 
 let currentPage = 1;
 const pageLimit = 20;

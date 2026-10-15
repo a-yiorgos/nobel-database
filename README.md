@@ -50,9 +50,10 @@ Designed specifically for Kubernetes and Red Hat OpenShift clusters, fulfilling 
 ├── frontend/                   # Dashboard Web Frontend
 │   ├── index.html              # Frontend HTML user interface
 │   ├── app.js                  # Frontend JS interactivity
+│   ├── env-config.js           # Default runtime configuration
+│   ├── 30-inject-config.sh     # Entrypoint script to inject API_SERVICE_URL
 │   ├── styles.css              # Custom CSS styling
 │   ├── nginx.conf              # Unprivileged Nginx configuration
-│   ├── default.conf.template   # Nginx template using API_SERVICE_URL
 │   └── Dockerfile              # Rootless Dockerfile for frontend
 ├── tests/                      # Suite of unit & integration tests
 │   └── test_backend.py         # Automated test cases

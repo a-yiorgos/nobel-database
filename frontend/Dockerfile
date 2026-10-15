@@ -1,13 +1,16 @@
 FROM nginxinc/nginx-unprivileged:alpine
 
 COPY frontend/nginx.conf /etc/nginx/nginx.conf
-COPY frontend/default.conf.template /etc/nginx/templates/default.conf.template
 COPY frontend/index.html /usr/share/nginx/html/index.html
 COPY frontend/styles.css /usr/share/nginx/html/styles.css
 COPY frontend/app.js /usr/share/nginx/html/app.js
+COPY frontend/env-config.js /usr/share/nginx/html/env-config.js
+COPY frontend/30-inject-config.sh /docker-entrypoint.d/30-inject-config.sh
 
-ENV API_SERVICE_URL=http://nobel-api-service:8000
-ENV NGINX_ENVSUBST_FILTER=API_SERVICE_URL
+USER root
+RUN chmod +x /docker-entrypoint.d/30-inject-config.sh && \
+    chmod -R g+rwX /usr/share/nginx/html
+USER 101
 
 EXPOSE 8080
 
